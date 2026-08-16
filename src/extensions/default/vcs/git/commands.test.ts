@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import {
   buildGitDiffArgs,
   buildGitIgnoredDirectoryArgs,
+  buildGitShowArgs,
   buildGitStashShowArgs,
   buildGitStatusArgs,
   listGitIgnoredDirectoryRoots,
@@ -104,6 +105,17 @@ describe("git command helpers", () => {
     });
 
     expect(args).toContain("--no-ext-diff");
+  });
+
+  test("keeps commit headers for direct Hunk show reviews", () => {
+    const args = buildGitShowArgs({
+      kind: "show",
+      ref: "HEAD",
+      options: {},
+    });
+
+    expect(args).toEqual(expect.arrayContaining(["show", "HEAD"]));
+    expect(args).not.toContain("--format=");
   });
 
   test("prevents optional index locks while discovering untracked files", () => {

@@ -10,9 +10,14 @@
  * escape sequences carrying them do not survive here.
  */
 import { sanitizeGitPatch, type SanitizedGitPatch } from "./gitFormat";
-import { stripGitLogMetadata } from "./gitLog";
+import { extractGitLogMetadata } from "./gitLog";
+import type { ExtensionCommitMetadata } from "../types";
 
 export { escapeUntrackedPatchPath } from "../../lib/patchPath";
+
+export interface SanitizedPatch extends SanitizedGitPatch {
+  commits: ExtensionCommitMetadata[];
+}
 
 /** Remove terminal escape sequences so Git-colored pager input still parses as plain patch text. */
 export function stripTerminalControl(text: string) {
@@ -24,10 +29,9 @@ export function stripTerminalControl(text: string) {
 }
 
 /** Sanitize patch text and retain exact decoded Git paths beside parser-safe headers. */
-export function sanitizePatch(patchText: string): SanitizedGitPatch {
-  return sanitizeGitPatch(
-    stripGitLogMetadata(stripTerminalControl(patchText.replaceAll("\r\n", "\n"))),
-  );
+export function sanitizePatch(patchText: string): SanitizedPatch {
+  const gitLog = extractGitLogMetadata(stripTerminalControl(patchText.replaceAll("\r\n", "\n")));
+  return { ...sanitizeGitPatch(gitLog.text), commits: gitLog.commits };
 }
 
 /** Sanitize patch text into the parser-friendly form used by text-only callers. */

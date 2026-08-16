@@ -133,6 +133,7 @@ export function changesetFromPatch(
   const lineMoveKinds = collectLineMoveKinds(patchText);
   const sanitizedPatch = sanitizePatch(patchText);
   const sanitizedPatchText = sanitizedPatch.text;
+  const commits = sanitizedPatch.commits.length > 0 ? sanitizedPatch.commits : undefined;
 
   let parsedPatches: ReturnType<typeof parsePatchFiles>;
   try {
@@ -144,6 +145,7 @@ export function changesetFromPatch(
       title,
       summary: sanitizedPatchText.trim() || undefined,
       agentSummary: sidecar?.summary,
+      ...(commits ? { commits } : {}),
       files: [],
     };
   }
@@ -161,6 +163,7 @@ export function changesetFromPatch(
         .filter(Boolean)
         .join("\n\n") || undefined,
     agentSummary: sidecar?.summary,
+    ...(commits ? { commits } : {}),
     files: metadataFiles.map((metadata, index) => {
       const decodedPaths = sanitizedPatch.filePaths[index];
       const normalizedMetadata = decodedPaths

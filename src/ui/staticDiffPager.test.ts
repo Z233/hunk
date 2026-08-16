@@ -31,6 +31,32 @@ function expectNoUnsafeTerminalControls(text: string) {
 }
 
 describe("static diff pager", () => {
+  test("renders Git commit metadata before the diff files", async () => {
+    const patchText = [
+      "commit 1a2b3c4d5e6f7890abcdef1234567890abcdef12 (HEAD -> main)",
+      "Author: Someone <me@example.com>",
+      "Date:   Tue Mar 3 12:00:00 2026 +0100",
+      "",
+      "    feat: do thing",
+      "",
+      "diff --git a/a.ts b/a.ts",
+      "--- a/a.ts",
+      "+++ b/a.ts",
+      "@@ -1 +1 @@",
+      "-const value = 1;",
+      "+const value = 2;",
+      "",
+    ].join("\n");
+
+    const plain = stripAnsi(await renderStaticDiffPager(patchText));
+
+    expect(plain).toContain("commit 1a2b3c4d5e6f7890abcdef1234567890abcdef12 (HEAD -> main)");
+    expect(plain).toContain("Author: Someone <me@example.com>");
+    expect(plain).toContain("Date:   Tue Mar 3 12:00:00 2026 +0100");
+    expect(plain).toContain("    feat: do thing");
+    expect(plain.indexOf("commit 1a2b3c4d")).toBeLessThan(plain.indexOf("a.ts modified +1 -1"));
+  });
+
   test("renders diff-like stdin as non-interactive ANSI output", async () => {
     const patchText =
       "diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1 +1 @@\n-const value = 1;\n+const value = 2;\n";

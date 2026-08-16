@@ -39,6 +39,7 @@ export type {
   CustomSyntaxColorsConfig,
   CustomSyntaxScopesConfig,
   CustomThemeConfig,
+  ExtensionCommitMetadata,
   ExtensionChangeset,
   ExtensionContext,
   ExtensionDiffFile,

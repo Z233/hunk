@@ -228,13 +228,7 @@ export function buildGitShowArgs(
   input: ExtensionVcsShowInput,
   colorMoved: GitColorMovedOptions | null = null,
 ) {
-  const args = [
-    "show",
-    "--format=",
-    "--no-ext-diff",
-    "--find-renames",
-    ...gitPatchColorArgs(colorMoved),
-  ];
+  const args = ["show", "--no-ext-diff", "--find-renames", ...gitPatchColorArgs(colorMoved)];
 
   if (input.ref) {
     args.push(input.ref);

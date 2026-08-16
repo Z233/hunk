@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { parsePatchFiles } from "@pierre/diffs";
-import { stripGitLogMetadata } from "./gitLog";
+import { extractGitLogMetadata, stripGitLogMetadata } from "./gitLog";
 
 describe("stripGitLogMetadata", () => {
   test("returns input unchanged when no commit boundary is present", () => {
@@ -97,6 +97,35 @@ describe("stripGitLogMetadata", () => {
     expect(stripGitLogMetadata(input)).toBe(
       ["diff --git a/foo b/foo", "@@ -1,1 +1,1 @@", " ctx", ""].join("\n"),
     );
+  });
+
+  test("extracts commit metadata while returning parser-safe patch text", () => {
+    const input = [
+      "commit 1a2b3c4d5e6f7890abcdef1234567890abcdef12 (HEAD -> main)",
+      "Author: Someone <me@example.com>",
+      "Date:   Tue Mar 3 12:00:00 2026 +0100",
+      "",
+      "    feat: do thing",
+      "",
+      "diff --git a/foo b/foo",
+      "@@ -1,1 +1,1 @@",
+      "-old",
+      "+new",
+      "",
+    ].join("\n");
+
+    expect(extractGitLogMetadata(input)).toEqual({
+      text: ["diff --git a/foo b/foo", "@@ -1,1 +1,1 @@", "-old", "+new", ""].join("\n"),
+      commits: [
+        {
+          sha: "1a2b3c4d5e6f7890abcdef1234567890abcdef12",
+          decorations: "HEAD -> main",
+          author: "Someone <me@example.com>",
+          date: "Tue Mar 3 12:00:00 2026 +0100",
+          subject: "feat: do thing",
+        },
+      ],
+    });
   });
 
   test("accepts abbreviated SHAs (--abbrev)", () => {

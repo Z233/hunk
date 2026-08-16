@@ -194,6 +194,15 @@ export interface ExtensionDiffFile {
   isTooLarge?: boolean;
 }
 
+/** Metadata from Git commit headers that wrapped a patch stream. */
+export interface ExtensionCommitMetadata {
+  sha: string;
+  decorations?: string;
+  author?: string;
+  date?: string;
+  subject?: string;
+}
+
 /** One reviewed changeset, as extensions see it. */
 export interface ExtensionChangeset {
   id: string;
@@ -201,6 +210,7 @@ export interface ExtensionChangeset {
   title: string;
   summary?: string;
   agentSummary?: string;
+  commits?: ExtensionCommitMetadata[];
   files: ExtensionDiffFile[];
 }
 

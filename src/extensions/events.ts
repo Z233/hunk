@@ -50,7 +50,16 @@ function describeError(error: unknown) {
  */
 export function toReadOnlyChangesetView(changeset: ExtensionChangeset): ExtensionChangeset {
   const files = Array.isArray(changeset.files) ? changeset.files : [];
-  return Object.freeze({ ...changeset, files: toReadOnlyFileViews(files) });
+  const commits = Array.isArray(changeset.commits)
+    ? (Object.freeze(
+        changeset.commits.map((commit) => Object.freeze({ ...commit })),
+      ) as unknown as ExtensionChangeset["commits"])
+    : undefined;
+  return Object.freeze({
+    ...changeset,
+    ...(commits ? { commits } : {}),
+    files: toReadOnlyFileViews(files),
+  });
 }
 
 /**

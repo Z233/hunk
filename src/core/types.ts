@@ -1,6 +1,7 @@
 import type { FileDiffMetadata } from "@pierre/diffs";
 import type {
   AgentFileContext,
+  ExtensionCommitMetadata,
   ExtensionVcsDiffInput,
   ExtensionVcsShowInput,
   ExtensionVcsStashShowInput,
@@ -22,6 +23,7 @@ export type {
   CustomSyntaxColorsConfig,
   CustomSyntaxScopesConfig,
   CustomThemeConfig,
+  ExtensionCommitMetadata,
   NamedCustomThemeConfig,
 } from "../extension-api/types";
 
@@ -80,6 +82,8 @@ export interface Changeset {
   title: string;
   summary?: string;
   agentSummary?: string;
+  /** Commit headers preserved from a Git patch stream, when the input included them. */
+  commits?: ExtensionCommitMetadata[];
   files: DiffFile[];
 }
 

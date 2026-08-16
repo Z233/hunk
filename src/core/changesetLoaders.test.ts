@@ -1258,6 +1258,8 @@ describe("loadAppBootstrap", () => {
 
     expect(latest.changeset.files.map((file) => file.path)).toEqual(["beta.ts"]);
     expect(previous.changeset.files.map((file) => file.path)).toEqual(["alpha.ts"]);
+    expect(latest.changeset.commits?.[0]?.subject).toBe("update beta");
+    expect(previous.changeset.commits?.[0]?.subject).toBe("update alpha");
   });
 
   test("reports a friendly error when show cannot resolve a ref", async () => {

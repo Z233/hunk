@@ -17,7 +17,12 @@
 import { loadAppBootstrap } from "../core/changesetLoaders";
 import { reviewEmptyDiffReason, type ReviewEmptyDiffReason } from "../core/review/document";
 import { DEFAULT_TAB_WIDTH } from "../core/tabWidth";
-import type { CommonOptions, DiffFile, NamedCustomThemeConfig } from "../core/types";
+import type {
+  CommonOptions,
+  DiffFile,
+  ExtensionCommitMetadata,
+  NamedCustomThemeConfig,
+} from "../core/types";
 import {
   buildSplitRows,
   buildStackRows,
@@ -344,6 +349,29 @@ function resolveStaticLayout(options: CommonOptions) {
   return options.mode === "split" ? "split" : "stack";
 }
 
+/** Render Git commit metadata that preceded a patch in a captured pager stream. */
+function renderCommitMetadata(commits: readonly ExtensionCommitMetadata[], theme: AppTheme) {
+  return commits
+    .map((commit) => {
+      const lines = [
+        `${colorText("commit ", theme.muted)}${colorText(commit.sha, theme.accent)}${commit.decorations ? ` ${colorText(`(${commit.decorations})`, theme.fileNew)}` : ""}`,
+      ];
+
+      if (commit.author) {
+        lines.push(colorText(`Author: ${commit.author}`, theme.text));
+      }
+      if (commit.date) {
+        lines.push(colorText(`Date:   ${commit.date}`, theme.text));
+      }
+      if (commit.subject) {
+        lines.push(colorText(`    ${commit.subject}`, theme.text));
+      }
+
+      return lines.join("\n");
+    })
+    .join("\n\n");
+}
+
 /** Format one parsed diff file for static pager hosts like LazyGit's diff panel. */
 async function renderStaticFile(
   file: DiffFile,
@@ -437,7 +465,10 @@ export async function renderStaticDiffPager(
       return sanitizeTerminalText(text);
     }
 
-    return `${rendered.join("\n\n")}\n`;
+    const commitMetadata = bootstrap.changeset.commits ?? [];
+    const commitHeader =
+      commitMetadata.length > 0 ? `${renderCommitMetadata(commitMetadata, theme)}\n\n` : "";
+    return `${commitHeader}${rendered.join("\n\n")}\n`;
   } catch (error) {
     warnFallback(deps, fallbackMessage(error));
     return sanitizeTerminalText(text);
