@@ -18,6 +18,7 @@ import type {
   AgentAnnotation,
   CursorLine,
   DiffFile,
+  ExtensionCommitMetadata,
   LayoutMode,
   UserNoteLineTarget,
 } from "../../../core/types";
@@ -79,6 +80,7 @@ import {
   type ViewportRowAnchor,
 } from "../../lib/viewportAnchor";
 import type { AppTheme } from "../../themes";
+import { CommitMetadataHeader } from "./CommitMetadataHeader";
 import { DiffSection } from "./DiffSection";
 import type { FileViewRowFailure } from "../../fileViews/types";
 import type { ValidatedLineHighlight } from "../../highlights/validate";
@@ -215,6 +217,7 @@ const NOOP_TOGGLE_GAP = () => {};
 /** Render the main multi-file review stream. */
 export function DiffPane({
   codeHorizontalOffset = 0,
+  commits = [],
   diffContentWidth,
   expandedGapsByFileId = EMPTY_EXPANDED_GAPS_BY_FILE_ID,
   fileViews = EMPTY_FILE_VIEWS,
@@ -275,6 +278,7 @@ export function DiffPane({
   onViewportLineCursorChange,
 }: {
   codeHorizontalOffset?: number;
+  commits?: readonly ExtensionCommitMetadata[];
   diffContentWidth: number;
   expandedGapsByFileId?: Record<string, ReadonlySet<string>>;
   /** Validated alternate layouts, keyed by file id; raw Pierre remains the fallback. */
@@ -2329,6 +2333,9 @@ export function DiffPane({
                   key={`diff-content:${layout}:${wrapLines ? "wrap" : "nowrap"}:tabs-${tabWidth}:${width}`}
                   style={{ width: "100%", flexDirection: "column", overflow: "visible" }}
                 >
+                  {commits.length > 0 ? (
+                    <CommitMetadataHeader commits={commits} theme={theme} width={width} />
+                  ) : null}
                   {fileRenderItems.map((item) => {
                     if (item.kind === "spacer") {
                       return (

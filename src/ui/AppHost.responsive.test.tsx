@@ -11,6 +11,15 @@ function createBootstrap(initialMode: LayoutMode = "auto", pager = false): AppBo
   return createTestVcsAppBootstrap({
     agentSummary: "Changeset summary",
     changesetId: "changeset:responsive",
+    commits: [
+      {
+        sha: "eeae37bf142ba3222a87b3e33390f7980fdf98b2",
+        decorations: "HEAD -> main",
+        author: "Z233 <z233@msn.com>",
+        date: "Sun Aug 16 23:44:57 2026 +0800",
+        subject: "docs: allow explicit chezmoi config deployment",
+      },
+    ],
     files: [
       createTestDiffFile({
         after: "export const alpha = 2;\nexport const add = true;\n",
@@ -89,6 +98,15 @@ async function captureResponsiveFrames() {
 }
 
 describe("responsive app", () => {
+  test("shows Git commit metadata in the interactive review stream", async () => {
+    const frame = await captureFrameForBootstrap(createBootstrap("auto", true), 220);
+
+    expect(frame).toContain("commit eeae37bf142ba3222a87b3e33390f7980fdf98b2 (HEAD -> main)");
+    expect(frame).toContain("Author: Z233 <z233@msn.com>");
+    expect(frame).toContain("Date:   Sun Aug 16 23:44:57 2026 +0800");
+    expect(frame).toContain("    docs: allow explicit chezmoi config deployment");
+  });
+
   test("App adjusts the visible panes and diff layout on live resize", async () => {
     const { ultraWide, full, medium, tight } = await captureResponsiveFrames();
 

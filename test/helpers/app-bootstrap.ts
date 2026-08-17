@@ -3,6 +3,7 @@ import type { AppBootstrap, DiffFile, VcsDiffCommandInput, LayoutMode } from "..
 export function createTestVcsAppBootstrap({
   agentSummary,
   changesetId = "changeset:test",
+  commits,
   files,
   vcsOptions = {},
   initialMode = "split",
@@ -21,6 +22,7 @@ export function createTestVcsAppBootstrap({
 }: {
   agentSummary?: string;
   changesetId?: string;
+  commits?: AppBootstrap["changeset"]["commits"];
   files: DiffFile[];
   vcsOptions?: Partial<VcsDiffCommandInput["options"]>;
   initialMode?: LayoutMode;
@@ -50,6 +52,7 @@ export function createTestVcsAppBootstrap({
     },
     changeset: {
       agentSummary,
+      ...(commits ? { commits } : {}),
       files,
       id: changesetId,
       sourceLabel,

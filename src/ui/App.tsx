@@ -2217,6 +2217,7 @@ export function App({
           <DiffPane
             cancelCopySelectionRef={cancelCopySelectionRef}
             codeHorizontalOffset={codeHorizontalOffset}
+            commits={bootstrap.changeset.commits}
             copyDecorations={copyDecorations}
             diffContentWidth={diffContentWidth}
             expandedGapsByFileId={review.expandedGapsByFileId}
