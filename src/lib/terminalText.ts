@@ -15,6 +15,7 @@ const sevenBitControlStrings =
 const c1ControlStrings = /[\x90\x98\x9d\x9e\x9f][\s\S]*?(?:\x07|\x1b\\|\x9c)/g;
 const c1Csi = /\x9b[0-?]*[ -/]*[@-~]/g;
 const preservedStyleTokenDelimiters = /[\u{f0000}\u{f0001}]/gu;
+const preservedStyleToken = /\u{f0000}(\d+)\u{f0001}/gu;
 
 /** Normalize untrusted terminal-bound text before rendering it in Hunk UI surfaces. */
 export function sanitizeTerminalText(
@@ -57,8 +58,12 @@ export function sanitizeTerminalText(
     .replace(c1Csi, "")
     .replace(controlCharacters, "");
 
-  for (const [index, sequence] of preservedStyles.entries()) {
-    sanitized = sanitized.replaceAll(`\u{f0000}${index}\u{f0001}`, sequence);
+  // Restore preserved styles in one pass. Replacing tokens one at a time scans the whole text
+  // per style, which is quadratic on colorful pager input (Git log can carry 100k+ SGR codes).
+  if (preservedStyles.length > 0) {
+    sanitized = sanitized.replace(preservedStyleToken, (token, index: string) => {
+      return preservedStyles[Number(index)] ?? token;
+    });
   }
 
   return sanitized;

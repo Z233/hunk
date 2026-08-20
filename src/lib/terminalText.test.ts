@@ -68,6 +68,21 @@ describe("sanitizeTerminalText", () => {
     expect(output).toBe("plain\x1b[1;34mblue\x1b[mdone");
   });
 
+  test("restores many preserved styles in one pass", () => {
+    // Git log/diff pager output can carry 100k+ SGR sequences. Restoring them with one
+    // full-text replaceAll per style is quadratic and hangs the pager; this input would
+    // blow past the test runner timeout on that code path.
+    const rows: string[] = [];
+    for (let index = 0; index < 20_000; index += 1) {
+      rows.push(`\x1b[33mcommit ${index}\x1b[m \x1b[32m| \x1b[m\x1b[31mred\x1b[m`);
+    }
+    const input = rows.join("\n");
+
+    const output = sanitizeTerminalText(input, { preserveAnsiStyle: true });
+
+    expect(output).toBe(input);
+  });
+
   test("does not preserve non-SGR CSI sequences as ANSI styling", () => {
     const output = sanitizeTerminalText("safe\x1b[2J\x1b[H\x1b[?25ltext", {
       preserveAnsiStyle: true,
